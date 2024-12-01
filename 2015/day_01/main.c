@@ -1,9 +1,11 @@
 #include <stdio.h>
 
-int main() {
+int main()
+{
     char *filename = "input.txt";
     FILE *file = fopen(filename, "r");
-    if (file == NULL) {
+    if (file == NULL)
+    {
         printf("Could not open file %s\n", filename);
         return 1;
     }
@@ -13,15 +15,20 @@ int main() {
     int basement_index = 0;
 
     char ch;
-    while ((ch = fgetc(file)) != EOF) {
+    while ((ch = fgetc(file)) != EOF)
+    {
         char_index++;
-        if (ch == '(') {
+        if (ch == '(')
+        {
             floor++;
-        } else if (ch == ')') {
+        }
+        else if (ch == ')')
+        {
             floor--;
         }
 
-        if (floor < 0 && basement_index == 0) {
+        if (floor < 0 && basement_index == 0)
+        {
             basement_index = char_index;
         }
     }
