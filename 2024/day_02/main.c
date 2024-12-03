@@ -2,59 +2,57 @@
 #include <stdlib.h>
 #include <string.h>
 
-int is_safe(char *list)
+int extract_items(int *list, char *string)
 {
+    int item_count = 0;
+
     const char s[2] = " ";
-
-    int prev_is_increasing = -1;
-    int is_increasing = -1;
-    int is_safe = 1;
-
-    int prev_val = atoi(strtok(list, s));
-    char *curr_val = strtok(NULL, s);
-    while (curr_val != NULL)
+    char *token = strtok(string, s);
+    while (token != NULL)
     {
-        prev_is_increasing = is_increasing;
+        item_count++;
+        list[item_count - 1] = atoi(token);
+        token = strtok(NULL, s);
+    }
 
-        if (!is_safe)
+    return item_count;
+}
+
+int is_safe(int *list, int list_size)
+{
+    int is_increasing = -1;
+
+    for (int i = 1; i < list_size; i++)
+    {
+        int prev_val = list[i - 1];
+        int curr_val = list[i];
+
+        if (curr_val == 0)
         {
-            curr_val = strtok(NULL, s);
-            continue;
+            return 1;
         }
-
-        int int_curr_val = atoi(curr_val);
 
         if (is_increasing == -1)
         {
-            is_increasing = int_curr_val > prev_val;
+            is_increasing = curr_val > prev_val;
         }
 
-        int is_direction_bad = is_increasing ? int_curr_val < prev_val : int_curr_val > prev_val;
+        int is_direction_bad = is_increasing ? curr_val < prev_val : curr_val > prev_val;
         if (is_direction_bad)
         {
-            is_safe = 0;
-            curr_val = strtok(NULL, s);
-            is_safe = 0;
             printf("Exiting out on isIncreasing\n");
-            continue;
+            return 0;
         }
 
-        int step = abs(int_curr_val - prev_val);
-        // printf("Step: %d\n", step);
+        int step = abs(curr_val - prev_val);
         if (step > 3 || step < 1)
         {
-            is_safe = 0;
-            curr_val = strtok(NULL, s);
-            is_safe = 0;
             printf("Exiting out on step\n");
-            continue;
+            return 0;
         }
-
-        prev_val = int_curr_val;
-        curr_val = strtok(NULL, s);
     }
 
-    return is_safe;
+    return 1;
 }
 
 int main()
@@ -75,11 +73,42 @@ int main()
     char buffer[MAX_LENGTH];
     while (fgets(buffer, MAX_LENGTH, file))
     {
-        int is_line_safe = is_safe(buffer);
+        int items[20] = {};
+        int item_count = extract_items(items, buffer);
+
+        // int is_line_safe = is_safe(items, item_count);
+        int is_line_safe = 0;
+        for (int i = 0; i < item_count; i++)
+        {
+            if (is_line_safe)
+            {
+                break;
+            }
+
+            int items_with_dropped[20] = {};
+            for (int j = 0; j < item_count; j++)
+            {
+                if (j < i)
+                {
+                    items_with_dropped[j] = items[j];
+                }
+                else if (j > i)
+                {
+                    items_with_dropped[j - 1] = items[j];
+                }
+            }
+
+            is_line_safe = is_safe(items_with_dropped, item_count - 1);
+        }
+
         if (is_line_safe)
         {
             printf("Line %d was safe.\n", line_count);
             safe_count++;
+        }
+        else
+        {
+            printf("Line %d was unsafe.\n", line_count);
         }
 
         line_count++;
